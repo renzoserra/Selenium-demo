@@ -1,0 +1,63 @@
+plugins {
+    id 'java'
+}
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Dependencias de Selenium
+// https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
+    implementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '4.20.0'
+    // Dependencias de Cucumber
+    implementation 'io.cucumber:cucumber-java:7.17.0'
+    implementation 'io.cucumber:cucumber-junit:7.18.0'
+    testImplementation 'junit:junit:4.13.2'
+// https://mvnrepository.com/artifact/com.aventstack/extentreports
+    implementation 'com.aventstack:extentreports:5.1.1'
+// https://mvnrepository.com/artifact/tech.grasshopper/extentreports-cucumber7-adapter
+    implementation 'tech.grasshopper:extentreports-cucumber7-adapter:1.14.0'
+    // https://mvnrepository.com/artifact/io.github.bonigarcia/webdrivermanager
+    implementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
+
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+
+task cucumber() {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+
+            // Leer tags desde el archivo si no se proporcionan en la línea de comandos. Archivo esta en el root
+            def tags = project.hasProperty('tags') ? project.tags : new File('tags.txt').text.trim()
+            println "Running with tags: $tags"
+
+            // Ajustar el formato de los argumentos para Cucumber
+            args = ['--plugin', 'pretty',
+                    '--plugin','com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:',
+                    '--tags', "${tags}",
+                    '--glue',
+                    'steps',
+                    'src/main/java/feature']
+        }
+    }
+}
+test {
+    systemProperty "cucumber.filter.tags", System.getProperty("cucumber.filter.tags")
+    testLogging {
+        showStandardStreams = true
+    }
+}
