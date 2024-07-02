@@ -14,7 +14,6 @@ public class Hooks {
     String browser = "chromegithubactions";
     @Before
     public void setup() {
-        String browser = System.getProperty("browser", "chrome"); // Por defecto, usa Chrome
         driver = WebDriverFactory.createWebDriver(browser);
         driver.manage().window().maximize();
     }
