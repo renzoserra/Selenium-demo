@@ -30,3 +30,10 @@ jobs:
       - name: Run Selenium & Cucumber Tests
         run: |
           ./gradlew cucumber
+
+      - name: Archive Test Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: test-output/HtmlReport/automationReport.html
